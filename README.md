@@ -8,6 +8,31 @@
 
 ---
 
+## 🔍 Face Recognition System
+
+The `face_rec/` folder contains a comprehensive face recognition implementation:
+
+- **📓 Training Notebook** - Complete dataset training pipeline with **92% accuracy**
+- **🗜️ Model Weights** - Pre-trained model weights stored in zip file format
+- **🎯 Recognition Engine** - Real-time face detection and recognition capabilities
+
+This component can be integrated with the main Jarvis AI system for personalized user interactions and enhanced security features.
+
+## 🤖 Open Source AI Components
+
+Jarvis AI is built entirely on **open source technologies**:
+
+- **🧠 Large Language Models (LLMs)** - Utilizes open source models via OpenRouter API
+  - Supports various open source models (Mistral, etc.)
+  - No dependency on proprietary AI services
+
+- **🗣️ Text-to-Speech** - **Kokoro TTS** for natural voice synthesis
+  - High-quality, open source TTS engine
+  - Customizable voice characteristics
+  - Local processing for privacy
+
+---
+
 ## 📋 Overview
 
 Jarvis AI is a modular voice-controlled AI assistant designed to interpret and execute user commands through natural voice interaction. The system provides hands-free control of various functions and features an extensible architecture for adding new capabilities.
@@ -61,7 +86,7 @@ jarvis_ai/
 
 ### Prerequisites
 
-- Python 3.7+
+- Python 3.11+
 - Microphone access
 - Speaker/headphone output
 
@@ -157,7 +182,7 @@ In silent mode, the assistant runs quietly in the background and only responds w
 | `WEATHERAPI_KEY` | WeatherAPI key | For weather |
 | `EMAIL_ADDRESS` | Email account | For email skills |
 | `EMAIL_PASSWORD` | Email app password | For email skills |
-| `WHATSAPP_API_KEY` | WhatsApp Business API | For WhatsApp |
+| `WHATSAPP_API_KEY` | WhatsApp Python Library | For WhatsApp |
 | `DEFAULT_LOCATION` | Default weather location | Optional |
 
 ### Application Settings

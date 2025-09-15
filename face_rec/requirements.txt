@@ -1,6 +1,0 @@
-fastapi              # Web framework to serve your model
-uvicorn              # ASGI server to run the FastAPI app
-scikit-learn         # For the SVM model and other machine learning tools
-numpy                # For handling input data and model predictions
-joblib               # For loading the saved SVM model
-pydantic             # For data validation (FastAPI uses this)
