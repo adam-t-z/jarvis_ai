@@ -2,7 +2,7 @@
 
 ## 🎥 Project Demonstration
 
-[**Watch the project demonstration video here**](YOUR_VIDEO_LINK_HERE)
+[**Watch the project demonstration video here**](https://youtu.be/UScktVhRJ8Y)
 
 > Replace `YOUR_VIDEO_LINK_HERE` with your actual video URL
 
