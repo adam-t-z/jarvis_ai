@@ -4,12 +4,32 @@ from core.tts import speak
 from skills.system.app_launcher import launch_notepad, launch_app, load_app_mappings
 from skills.general.hello_skill import say_hello
 import re
- 
+
+# Import the browser skill runner (sync wrapper)
+from skills.browser_skill import run_browser_task_sync
 
 def route_command(command):
     """Route commands to appropriate handlers. Returns True if handled, False otherwise."""
     command_lower = command.lower().strip()
- 
+
+    # --- Browser skill detection ---
+    browse_keywords = ["go to", "search", "look up"]
+    if any(keyword in command_lower for keyword in browse_keywords):
+        try:
+            speak("Understood, Sir. I'll fetch the information now.")
+            success = run_browser_task_sync(command)
+            if not success:
+                speak("Sorry, Sir. I couldn't complete the browsing task.")
+            else:
+                speak("Task completed, Sir.")
+            return True
+        except Exception as e:
+            speak("Sorry, Sir. I couldn't complete the browser task.")
+            print(f"[ERROR] Browser task error: {e}")
+            return True
+
+    # --- Existing routing logic ---
+
     # Handle hello/greeting commands
     if any(word in command_lower for word in ["hello", "hi", "hey", "good morning", "good afternoon"]):
         say_hello()
@@ -42,24 +62,25 @@ def route_command(command):
     # Unknown command → return False so LLM can handle it
     return False
 
+
 def extract_app_name(command):
     """Extract app name from voice command."""
     # Remove common command words
     command = re.sub(r'\b(open|launch|start|run|please|can you|could you)\b', '', command)
     command = command.strip()
-    
+
     # Load app mappings to check against known apps
     app_map = load_app_mappings()
-    
+
     # Try to find exact matches first
     words = command.split()
-    
+
     # Check for multi-word app names
     for i in range(len(words), 0, -1):
         for j in range(len(words) - i + 1):
             potential_app = ' '.join(words[j:j+i])
             if potential_app in app_map:
                 return potential_app
-    
+
     # If no exact match, return the cleaned command for fuzzy matching
     return command if command else None

@@ -2,9 +2,9 @@
 
 import speech_recognition as sr
 
-# All acceptable transcriptions of the name "Sami"
-SAMI_WAKE_WORDS = {
-    "sami", "sammy", "samy", "samee", "saami", "sahmi", "sammi", "sam"
+# All acceptable transcriptions of the name "Sarah"
+SARAH_WAKE_WORDS = {
+    "sarah", "sara", "sarra", "sarah", "sahra", "sahara", "sari", "sarae"
 }
 
 def listen_for_wake_word(callback_func=None):
@@ -43,8 +43,8 @@ def listen_for_wake_word(callback_func=None):
                 
                 # Check for any wake word in the transcript
                 for word in words:
-                    if word in SAMI_WAKE_WORDS:
-                        detected_word = "sami"
+                    if word in SARAH_WAKE_WORDS:
+                        detected_word = "sarah"
                         break
                 
                 if detected_word:

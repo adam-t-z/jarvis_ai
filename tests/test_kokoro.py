@@ -7,7 +7,7 @@ pipeline = KPipeline(lang_code='a')
 # [Kokoro](/kˈOkəɹO/) is an open-weight TTS model with 82 million parameters. Despite its lightweight architecture, it delivers comparable quality to larger models while being significantly faster and more cost-efficient. With Apache-licensed weights, [Kokoro](/kˈOkəɹO/) can be deployed anywhere from production environments to personal projects.
 # '''
 
-text = "Yes, sir. How can i help you?"
+text = "Goodbye, Sir."
 
 generator = pipeline(text, voice='af_heart')
 

@@ -21,7 +21,7 @@ def handle_conversation(user_text):
     messages = [
         {
             "role": "system", 
-            "content": "Your name is Sami, a helpful and respectful AI assistant. "
+            "content": "Your name is Sarah, a helpful and respectful AI assistant. "
                       "You are speaking to your user who you address as 'Sir'. "
                       "Be polite, concise, and helpful. Avoid emojis in responses. "
                       "Keep responses brief and natural for voice interaction."

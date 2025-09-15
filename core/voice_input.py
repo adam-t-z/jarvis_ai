@@ -1,5 +1,4 @@
 import speech_recognition as sr
-from core.tts import speak
 
 def listen(timeout=5, phrase_time_limit=7):
     recognizer = sr.Recognizer()

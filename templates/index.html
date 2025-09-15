@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarah AI Assistant</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #3b73c0 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .background-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+
+        /* Main container */
+        .container {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        /* Sarah circle - positioned in upper middle */
+        .sarah-container {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 4rem;
+        }
+
+        .sarah-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4a90e2, #2171b5, #1e5f8b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 0 30px rgba(74, 144, 226, 0.4),
+                0 0 60px rgba(74, 144, 226, 0.2),
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .sarah-circle:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 40px rgba(74, 144, 226, 0.6),
+                0 0 80px rgba(74, 144, 226, 0.3),
+                inset 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .sarah-name {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* State indicator */
+        .state-indicator {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e3c72;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        /* State animations */
+        .sarah-circle.listening {
+            animation: listening-pulse 2s ease-in-out infinite;
+        }
+
+        .sarah-circle.thinking {
+            animation: thinking-rotate 1s linear infinite;
+        }
+
+        .sarah-circle.speaking {
+            animation: speaking-bounce 0.5s ease-in-out infinite alternate;
+        }
+
+        .sarah-circle.idle {
+            opacity: 0.7;
+            animation: idle-fade 3s ease-in-out infinite;
+        }
+
+        @keyframes listening-pulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 30px rgba(74, 144, 226, 0.4),
+                    0 0 60px rgba(74, 144, 226, 0.2),
+                    inset 0 0 30px rgba(255, 255, 255, 0.1);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 50px rgba(74, 144, 226, 0.8),
+                    0 0 100px rgba(74, 144, 226, 0.4),
+                    inset 0 0 30px rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        @keyframes thinking-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes speaking-bounce {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        @keyframes idle-fade {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.5; }
+        }
+
+        /* AI Speech section - lower left */
+        .ai-speech-section {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 300px;
+            max-height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .ai-speech-section h3 {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .ai-speech-text {
+            color: white;
+            font-size: 1rem;
+            line-height: 1.4;
+            max-height: 120px;
+            overflow-y: auto;
+            word-wrap: break-word;
+        }
+
+        .ai-speech-text::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .ai-speech-text::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .ai-speech-text::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        /* Controls */
+        .controls {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        .control-btn.active {
+            background: rgba(74, 144, 226, 0.3);
+            border-color: rgba(74, 144, 226, 0.5);
+        }
+
+        /* Connection status */
+        .connection-status {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4444;
+            transition: background-color 0.3s ease;
+        }
+
+        .status-dot.connected {
+            background: #44ff44;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .sarah-circle {
+                width: 150px;
+                height: 150px;
+            }
+
+            .sarah-name {
+                font-size: 1.4rem;
+                letter-spacing: 2px;
+            }
+
+            .ai-speech-section {
+                width: 250px;
+                bottom: 1rem;
+                left: 1rem;
+            }
+
+            .controls {
+                bottom: 1rem;
+                right: 1rem;
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background particles -->
+    <div class="background-particles" id="particles"></div>
+
+    <!-- Main container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Sarah AI Assistant</h1>
+            <p>Your intelligent voice companion</p>
+        </div>
+
+        <!-- Sarah Circle - Upper Middle -->
+        <div class="sarah-container">
+            <div class="sarah-circle listening" id="sarahCircle">
+                <div class="sarah-name">SARAH</div>
+                <div class="state-indicator" id="stateIndicator">Listening</div>
+            </div>
+        </div>
+
+        <!-- This div helps with spacing -->
+        <div></div>
+    </div>
+
+    <!-- AI Speech Section - Lower Left -->
+    <div class="ai-speech-section">
+        <h3>Sarah Says:</h3>
+        <div class="ai-speech-text" id="aiSpeechText">
+            Listening for wake word 'Sarah'...
+        </div>
+    </div>
+
+    <!-- Controls - Lower Right -->
+    <div class="controls">
+        <button class="control-btn active" id="startBtn">Start Listening</button>
+        <button class="control-btn" id="stopBtn">Stop</button>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="connection-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="connectionText">Connecting...</span>
+    </div>
+
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        // DOM elements
+        const sarahCircle = document.getElementById('sarahCircle');
+        const stateIndicator = document.getElementById('stateIndicator');
+        const aiSpeechText = document.getElementById('aiSpeechText');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusDot = document.getElementById('statusDot');
+        const connectionText = document.getElementById('connectionText');
+
+        // State management
+        let isConnected = false;
+        let currentState = 'listening';
+
+        // Socket event handlers
+        socket.on('connect', function() {
+            isConnected = true;
+            statusDot.classList.add('connected');
+            connectionText.textContent = 'Connected';
+            console.log('Connected to Sarah AI');
+            
+            // Request current status
+            socket.emit('get_status');
+        });
+
+        socket.on('disconnect', function() {
+            isConnected = false;
+            statusDot.classList.remove('connected');
+            connectionText.textContent = 'Disconnected';
+            console.log('Disconnected from Sarah AI');
+        });
+
+        socket.on('state_update', function(data) {
+            console.log('State update:', data);
+            updateUI(data.state, data.speech);
+        });
+
+        // UI update function
+        function updateUI(state, speech) {
+            currentState = state;
+            
+            // Update circle animation
+            sarahCircle.className = `sarah-circle ${state}`;
+            
+            // Update state indicator
+            const stateLabels = {
+                'listening': 'Listening',
+                'thinking': 'Thinking',
+                'speaking': 'Speaking',
+                'idle': 'Idle'
+            };
+            
+            stateIndicator.textContent = stateLabels[state] || state;
+            
+            // Update speech text
+            if (speech) {
+                aiSpeechText.textContent = speech;
+                
+                // Auto-scroll to bottom
+                aiSpeechText.scrollTop = aiSpeechText.scrollHeight;
+            }
+        }
+
+        // Control button handlers
+        startBtn.addEventListener('click', function() {
+            if (isConnected) {
+                socket.emit('start_listening');
+                startBtn.classList.add('active');
+                stopBtn.classList.remove('active');
+            }
+        });
+
+        stopBtn.addEventListener('click', function() {
+            if (isConnected) {
+                socket.emit('stop_listening');
+                stopBtn.classList.add('active');
+                startBtn.classList.remove('active');
+            }
+        });
+
+        // Sarah circle click handler
+        sarahCircle.addEventListener('click', function() {
+            if (isConnected) {
+                if (currentState === 'idle') {
+                    startBtn.click();
+                } else {
+                    // Just show current state
+                    console.log('Current state:', currentState);
+                }
+            }
+        });
+
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const numberOfParticles = 20;
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random size
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                // Random position
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                // Random animation delay
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize
+        createParticles();
+        
+        // Auto-start listening when page loads
+        setTimeout(() => {
+            if (isConnected) {
+                startBtn.click();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

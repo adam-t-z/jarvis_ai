@@ -82,9 +82,9 @@ jarvis_ai/
 - ✅ Fuzzy matching for app names
 - ✅ Integrated command routing with natural language processing
 - ✅ Support for 90+ applications via JSON configuration
-- ✅ **Sami-Only Activation**: Responds only to "Sami" wake word and variations
+- ✅ **Sarah-Only Activation**: Responds only to "Sarah" wake word and variations
 - ✅ **Continuous Mode**: Stays active until dismissed with "that's all", "bye", or "stop listening"
 - ✅ **Speech Recognition**: Uses Google Speech Recognition for wake word detection
-- ✅ **Natural Interaction**: Supports multiple pronunciations ("Sami", "Sammy", "Sam", etc.)
+- ✅ **Natural Interaction**: Supports multiple pronunciations ("Sarah", "Sara", "Sari", etc.)
 - ✅ **Polite Responses**: Respectful language with "Sir" addressing throughout
 - ✅ **Simplified Architecture**: Removed unnecessary fallback complexity

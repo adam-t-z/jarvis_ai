@@ -1,4 +1,4 @@
-# main.py
+import time
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -6,20 +6,30 @@ from core.voice_input import listen, listen_with_timeout
 from core.command_router import route_command
 from core.conversation import handle_conversation
 from core.tts import speak
-from core.wake_word_listener import listen_continuously, SAMI_WAKE_WORDS
+from core.wake_word_listener import listen_continuously, SARAH_WAKE_WORDS
+
+import warnings
+warnings.filterwarnings("ignore")
+
 
 def handle_wake_word_activation(wake_word: str):
-    """Handle actions when wake word is detected."""
-    # Only respond to "Sami" - enter continuous conversation mode
-    if wake_word.lower() == "sami":
+    print(f"[DEBUG] Wake word detected: {wake_word}")
+    start = time.time()
+
+    print(wake_word)
+    # Only respond to "Sarah" - enter continuous conversation mode
+    if wake_word.lower() == "sarah":
+        print("[DEBUG] Responding to wake word...")
         speak("Yes, Sir?")
         
-        # Enter continuous conversation mode
-        sami_continuous_mode()
+        print("[DEBUG] Entering continuous conversation mode...")
+        sarah_continuous_mode()
 
-def sami_continuous_mode():
-    """Continuous conversation mode for Sami - stays active until dismissed."""
-    # Exit phrases that end the conversation
+    print(f"[DEBUG] handle_wake_word_activation finished in {time.time() - start:.2f} seconds")
+
+
+def sarah_continuous_mode():
+    """Continuous conversation mode for Sarah - stays active until dismissed."""
     exit_phrases = [
         "that's all", "thats all", "that is all",
         "bye", "goodbye", "stop listening", "stop", 
@@ -30,17 +40,18 @@ def sami_continuous_mode():
     
     try:
         while True:
-            # Listen for the next command/conversation with 15-second timeout
+            print("[DEBUG] Listening for command (timeout 15s)...")
+            listen_start = time.time()
             command = listen_with_timeout(15)
-            
-            # Handle timeout case
+            listen_duration = time.time() - listen_start
+            print(f"[DEBUG] listen_with_timeout returned in {listen_duration:.2f} seconds: '{command}'")
+
             if command == "TIMEOUT":
                 speak("I haven't heard anything for a while, Sir. I'll return to silent mode now.")
-                print("🤫 Sami AI Assistant returning to silent mode")
+                print("🤫 Sarah AI Assistant returning to silent mode")
                 break
             
             if not command or not command.strip():
-                # If no command, prompt gently
                 if conversation_count == 0:
                     speak("How may I assist you, Sir?")
                 else:
@@ -50,48 +61,52 @@ def sami_continuous_mode():
             conversation_count += 1
             command_lower = command.lower().strip()
             
-            # Check for exit phrases
             if any(phrase in command_lower for phrase in exit_phrases):
-                # Polite dismissal
-                if "thank" in command_lower:
-                    speak("You're welcome, Sir. I live to serve.")
-                else:
-                    speak("Very well, Sir. I'll be here if you need me.")
+                speak("You're welcome, Sir. I live to serve.")
                 break
             
-            # Check if user is calling Sami again (reinforcement)
-            if any(word in command_lower.split() for word in SAMI_WAKE_WORDS):
+            if any(word in command_lower.split() for word in SARAH_WAKE_WORDS):
                 speak("Yes, Sir? I'm still listening.")
                 continue
             
             # Process the command through normal routing
             try:
+                print(f"[DEBUG] Routing command: {command}")
+                route_start = time.time()
                 handled = route_command(command)
+                route_duration = time.time() - route_start
+                print(f"[DEBUG] route_command took {route_duration:.2f} seconds, handled={handled}")
                 
-                # If not handled by command router, use conversational AI
                 if not handled:
+                    print("[DEBUG] Handling conversation with LLM...")
+                    conv_start = time.time()
                     handle_conversation(command)
+                    conv_duration = time.time() - conv_start
+                    print(f"[DEBUG] handle_conversation took {conv_duration:.2f} seconds")
                 
             except Exception as e:
                 speak("I apologize, Sir. I encountered an error. Please try again.")
+                print(f"[ERROR] Exception in command processing: {e}")
                 
     except KeyboardInterrupt:
         speak("Goodbye, Sir.")
     except Exception as e:
         speak("I apologize, Sir. I need to step away for a moment.")
+        print(f"[ERROR] Exception in sarah_continuous_mode: {e}")
+
 def main():
-    """Main application loop with wake word detection."""
-    print("🤫 Sami AI Assistant running in silent mode")
+    print("🤫 Sarah AI Assistant starting...")
+    start = time.time()
     
     try:
-        # Start wake word detection using speech recognition
+        print("Initializing wake word detection...")
         listen_continuously(handle_wake_word_activation)
-            
     except KeyboardInterrupt:
         speak("Goodbye, Sir!")
     except Exception as e:
-        print(f"Failed to start Sami AI: {e}")
-
+        print(f"Failed to start Sarah AI: {e}")
+    
+    print(f"Startup + run time: {time.time() - start:.2f} seconds")
 
 if __name__ == "__main__":
     main()
