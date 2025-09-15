@@ -1,0 +1,8 @@
+# Ignore the large model file
+assets/llms/*.gguf
+
+# Optional: Other common stuff
+venv/
+__pycache__/
+*.pyc
+.env

@@ -1,0 +1,8 @@
+	# openrouter/sonoma-dusk-alpha    ==> fastest
+	# openrouter/sonoma-sky-alpha
+	# mistralai/mistral-small-3.2-24b-instruct:free   ==> pretty close to the above two
+	# mistralai/mistral-7b-instruct:free
+	# cognitivecomputations/dolphin-mistral-24b-venice-edition:free  ==> longest answer I think
+	# google/gemma-3n-e2b-it:free
+	# deepseek/deepseek-chat-v3-0324:free
+	# nvidia/nemotron-nano-9b-v2:free

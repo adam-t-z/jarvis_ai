@@ -1,0 +1,22 @@
+
+
+# ************Using pyttsx3
+
+# # core/tts.py
+# import pyttsx3
+
+# """
+# There was a problem with the TTS engine.
+# Solution: init the model every time you use it.
+# """
+
+# def speak(text):
+#     print(f"Assistant: {text}")
+#     try:
+#         engine = pyttsx3.init()
+#         engine.setProperty('rate', 150)
+#         engine.say(text)
+#         engine.runAndWait()
+#         engine.stop()
+#     except Exception as e:
+#         print(f"TTS error: {e}")

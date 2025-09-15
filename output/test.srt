@@ -1,0 +1,8 @@
+1
+00:00:00,993 --> 00:00:02,507
+Hello, can you hear my voice?
+
+2
+00:00:03,072 --> 00:00:05,130
+This is a five second recorded.
+
